@@ -4,7 +4,7 @@ This is a remake of Chloe's SSR mod for FlatOut 2, using Reloaded
 
 https://github.com/user-attachments/assets/7e23c91b-7c10-4bbd-85c7-d3b5a2d5cd7d
 
-Right now it only replaces the car body shader, I'm still working on the rest.
+Right now it only replaces the car body shader, I'll add the window shaders once those are done
 
 ## Using
 

@@ -1,0 +1,15 @@
+C:\Users\zackw\Desktop\Reloaded-II\Mods\FlatOut2_ZacksSSR\Preview.png
+C:\Users\zackw\Desktop\Reloaded-II\Mods\FlatOut2_ZacksSSR\ModConfig.json
+C:\Users\zackw\Desktop\Reloaded-II\Mods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR.deps.json
+C:\Users\zackw\Desktop\Reloaded-II\Mods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR.dll
+C:\Users\zackw\Desktop\Reloaded-II\Mods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR.pdb
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.csproj.AssemblyReference.cache
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.GeneratedMSBuildEditorConfig.editorconfig
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.AssemblyInfoInputs.cache
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.AssemblyInfo.cs
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.csproj.CoreCompileInputs.cache
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2.6E583EAB.Up2Date
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.dll
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\refint\FlatOut2_ZacksSSR.dll
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\FlatOut2_ZacksSSR.pdb
+D:\reloadedmods\FlatOut2_ZacksSSR\FlatOut2_ZacksSSR\obj\Debug\ref\FlatOut2_ZacksSSR.dll

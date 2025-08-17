@@ -127,4 +127,5 @@ PixelShader(float2 uv2D, float3 uvNormal, float3 uvReflection, float3 AMBIENT, f
     float4 cubeMapCol = lerp(col, cubeMapSample, FRESNEL) * light;
 
     return lerp(cubeMapCol, SSRCol, SSRStrength);
+
 }

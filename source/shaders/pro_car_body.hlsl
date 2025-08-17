@@ -69,7 +69,6 @@ samplerCUBE specular;
 sampler2D dirt;
 samplerCUBE lighting;
 sampler2D prevFrame;
-sampler2D prevDepth;
 
 PixelShader(float2 uv2D, float3 uvNormal, float3 uvReflection, float3 AMBIENT, float4 BLEND, float4 FRESNEL, float3 EXTRA, float3 psPos, float3 camPos, float3 camRight)
 {
@@ -102,8 +101,6 @@ PixelShader(float2 uv2D, float3 uvNormal, float3 uvReflection, float3 AMBIENT, f
     e.y *= 0.5f;
     e.y -= 0.495f;
     e.x -= 0.5f;
-
-    return tex2D(prevDepth, e.xy);
 
     e.y += -reflection.y;
     e.x += reflection.x;

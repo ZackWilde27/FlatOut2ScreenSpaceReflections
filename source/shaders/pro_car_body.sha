@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // pro_car_body.sha
 ///////////////////////////////////////////////////////////////////////////
-// Created on 8/16/2025 6:54:30 PM
+// Created on 8/16/2025 8:38:43 PM
 //
 // Authors: Zack
 //
@@ -12,7 +12,6 @@ Texture Tex1;
 Texture Tex2;
 Texture Tex3;
 Texture Tex4;
-Texture Tex5;
 
 const string inputStreamFormat = "PosNormColorTex1";
 
@@ -117,7 +116,6 @@ pixelshader pSdr =
 		dcl_2d	s2	; dirt
 		dcl_cube	s3	; lighting
 		dcl_2d	s4	; prevFrame
-		dcl_2d	s5	; prevDepth
 
 		; Calculate the reflection per-pixel for more accuracy
 		mov	r0.xyz, v7
@@ -157,7 +155,53 @@ pixelshader pSdr =
 		mul	r6.y, r6.y, c223.z
 		sub	r6.y, r6.y, c4.x
 		sub	r6.x, r6.x, c223.z
-		texld	oC0, r6.xy, s5
+		mov	r7, -r2.y
+		add	r6.y, r6.y, r7.x
+		add	r6.x, r6.x, r2.x
+		mov	r7.x, c4.y
+		if_lt	r6.x, r7.x
+			mov	r4.x, c223.w
+		else
+			if_lt	r6.y, c4.y
+				mov	r4.x, c223.w
+			else
+				mov	r7.x, c223.w
+				if_gt	r6.x, r7.x
+					mov	r4.x, c223.w
+				else
+					mov	r7.y, c223.w
+					if_gt	r6.y, r7.y
+						mov	r4.x, c223.w
+					endif
+				endif
+			endif
+		endif
+
+		; Random comment that needs to be put here
+		texld	r8, r6.xy, s4
+		mul	r7, r8, v5
+
+		; Areas that are damaged will get no reflections
+		sub	r8, c223.y, v4
+		mul	r7, r7, r8
+		sub	r8, c223.y, v4
+		mul	r3, r3, r8
+
+		; Blend between clean and dirt
+		texld	r9, v0, s0
+		texld	r10, v0, s2
+		lrp	r8, v4, r10, r9
+		texld	r10, v1, s3
+		mul	r9, r10.a, c2
+		mad	r10, v3, c4.z, r9
+		min	r9, r10, c223.y
+		max	r9, r9, c223.w
+		min	r9, r9, c4.w
+		mul	r10, r8, r9
+		mad	r10, r7, c3.x, r10
+		lrp	r12, v5, r3, r8
+		mul	r11, r12, r9
+		lrp	oC0, r4.x, r10, r11
 
 	};
 
@@ -172,7 +216,7 @@ Technique T0
 		VertexShaderConstantF[255] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
 
 		PixelShaderConstantF[3] = float4(0.75f, 4.0f, 0.3f, 0.52f);
-		PixelShaderConstantF[4] = float4(0.495f, 0.0f, 0.0f, 0.0f);
+		PixelShaderConstantF[4] = float4(0.495f, -1.0f, 0.6f, 0.8f);
 		PixelShaderConstantF[223] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
 
 		Texture[0] = <Tex0>;
@@ -180,7 +224,6 @@ Technique T0
 		Texture[2] = <Tex2>;
 		Texture[3] = <Tex3>;
 		Texture[4] = <Tex4>;
-		Texture[5] = <Tex5>;
 
 		VertexShader = <vSdr>;
 		PixelShader = <pSdr>;

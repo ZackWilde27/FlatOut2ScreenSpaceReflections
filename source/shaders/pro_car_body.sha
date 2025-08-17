@@ -1,0 +1,188 @@
+///////////////////////////////////////////////////////////////////////////
+// pro_car_body.sha
+///////////////////////////////////////////////////////////////////////////
+// Created on 8/16/2025 6:54:30 PM
+//
+// Authors: Zack
+//
+// Zack's HLSL-to-FlatOut-Shader v3.3.5
+///////////////////////////////////////////////////////////////////////////
+Texture Tex0;
+Texture Tex1;
+Texture Tex2;
+Texture Tex3;
+Texture Tex4;
+Texture Tex5;
+
+const string inputStreamFormat = "PosNormColorTex1";
+
+vertexshader vSdr =
+	decl
+	{
+		stream 0;
+		float	v0[3];	// pos
+		float	v1[3];	// nrm
+		D3DCOLOR	v2;	// diff
+		float	v3[2];	// uv
+
+	}
+	asm
+	{
+		vs.3.0
+
+		dcl_position	v0
+		dcl_normal	v1
+		dcl_color	v2
+		dcl_texcoord	v3
+
+		dcl_position	o0
+		dcl_texcoord0	o1	; uv2D
+		dcl_texcoord1	o2	; uvNormal
+		dcl_texcoord2	o3	; uvReflection
+		dcl_texcoord3	o4	; AMBIENT
+		dcl_texcoord4	o5	; BLEND
+		dcl_texcoord5	o6	; FRESNEL
+		dcl_texcoord6	o7	; EXTRA
+		dcl_texcoord7	o8	; psPos
+		dcl_texcoord8	o9	; camPos
+		dcl_texcoord9	o10	; camRight
+
+		mov	o1.xy, v3.xy
+
+		; Lighting
+		m3x3	r0.xyz, v1, c4
+		mov	r0.w, c255.y
+		mov	o2.xyz, r0
+		m4x3	r3.xyz, v0, c4
+		mov	o8.xyz, r3.xyz
+		mov	o9.xyz, c8.xyz
+
+		; This missing semi-colon was a mistake, but it actually ended up making it look right in the end so
+		sub	r5.xyz, r3.xyz, c8.xyz
+		nrm r4.xyz, r5.xyz
+		dp3	r5.x, r4.xyz, r0
+		add	r5.x, r5.x, r5.x
+		mul	r5.xyz, r5.x, r0
+		sub	r5.xyz, r4.xyz, r5.xyz
+
+		; Fresnel
+		dp3	r7.x, r4.xyz, r0
+		abs r6.x, r7.x
+		sub	r6.x, c255.y, r6.x
+		mul	r6.y, r6.x, r6.x
+		mul	r6.y, r6.y, r6.x
+		mad	r6.y, r6.y, c33.x, c33.y
+		mov	o6, r6.y
+		mul	o3.xyz, r5.xyz, c32.w
+
+		; Blend
+		mov	o5, v2.a
+
+		; Ambient
+		mov	r0.w, c255.y
+		dp4	r8.x, r0, c17
+		rsq	r7.x, r8.x
+		rcp	r7.x, r7.x
+		dp4	r8.x, r0, c18
+		rsq	r7.y, r8.x
+		rcp	r7.y, r7.y
+		dp4	r8.x, r0, c19
+		rsq	r7.z, r8.x
+		rcp	r7.z, r7.z
+		mov	o4.xyz, r7
+		m4x4	r8, v0, c0
+		mov	o7.xyz, r8.xy
+		mov	o0, r8
+
+	};
+
+pixelshader pSdr =
+	asm
+	{
+		ps.3.0
+
+		dcl_texcoord0	v0	; uv2D
+		dcl_texcoord1	v1	; uvNormal
+		dcl_texcoord2	v2	; uvReflection
+		dcl_texcoord3	v3	; AMBIENT
+		dcl_texcoord4	v4	; BLEND
+		dcl_texcoord5	v5	; FRESNEL
+		dcl_texcoord6	v6	; EXTRA
+		dcl_texcoord7	v7	; psPos
+		dcl_texcoord8	v8	; camPos
+		dcl_texcoord9	v9	; camRight
+
+		dcl_2d	s0	; colour
+		dcl_cube	s1	; specular
+		dcl_2d	s2	; dirt
+		dcl_cube	s3	; lighting
+		dcl_2d	s4	; prevFrame
+		dcl_2d	s5	; prevDepth
+
+		; Calculate the reflection per-pixel for more accuracy
+		mov	r0.xyz, v7
+		sub	r2.xyz, r0.xyz, v8
+		nrm	r1.xyz, r2.xyz
+		dp3	r2.x, r1.xyz, v1
+		add	r2.x, r2.x, r2.x
+		mul	r2.xyz, r2.x, v1
+		sub	r2.xyz, r1.xyz, r2.xyz
+		texld	r4, r2.xyz, s1
+		mul	r3, r4, v5
+
+		; Areas that point towards the screen will get SSR, while the other areas will revert back to the cubemap
+		dp3	r4.x, r2.xyz, r1.xyz
+		sub	r4.x, r4.x, c3.x
+		mul	r4.x, r4.x, c3.y
+		min	r4.x, r4.x, c223.y
+		max	r4.x, r4.x, c223.w
+		rsq	r4.x, r4.x
+		rcp	r4.x, r4.x
+		mul	r2.y, r2.y, c3.z
+		dp3	r2.x, v9, r2.xyz
+		mul	r2.x, r2.x, c3.z
+		sub	r6, r0.xyz, v8
+		dp3	r5.x, r6, r6
+		rsq	r5.x, r5.x
+		rcp	r5.x, r5.x
+
+		; The screen position confuses me, it's kinda -1 to 1 but not really, so I just experimented to find constants that work well enough
+		mov	r6, v6
+		rcp r7.x, r5.x
+		mul	r6.x, r6.x, r7.x
+		rcp r7.x, r5.x
+		mul	r6.y, r6.y, r7.x
+		mov	r6.y, -r6.y
+		mul	r6.x, r6.x, c3.w
+		mul	r6.y, r6.y, c223.z
+		sub	r6.y, r6.y, c4.x
+		sub	r6.x, r6.x, c223.z
+		texld	oC0, r6.xy, s5
+
+	};
+
+Technique T0
+{
+
+	Pass P0
+	{
+
+		VertexShaderConstantF[32] = float4(0.0f, 1.0f, 0.0f, 0.2f);
+		VertexShaderConstantF[33] = float4(0.6f, 0.3f, 0.0f, 0.0f);
+		VertexShaderConstantF[255] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
+
+		PixelShaderConstantF[3] = float4(0.75f, 4.0f, 0.3f, 0.52f);
+		PixelShaderConstantF[4] = float4(0.495f, 0.0f, 0.0f, 0.0f);
+		PixelShaderConstantF[223] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
+
+		Texture[0] = <Tex0>;
+		Texture[1] = <Tex1>;
+		Texture[2] = <Tex2>;
+		Texture[3] = <Tex3>;
+		Texture[4] = <Tex4>;
+		Texture[5] = <Tex5>;
+
+		VertexShader = <vSdr>;
+		PixelShader = <pSdr>;
+	}
+}

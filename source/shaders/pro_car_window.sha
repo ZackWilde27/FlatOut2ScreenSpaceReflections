@@ -1,0 +1,165 @@
+///////////////////////////////////////////////////////////////////////////
+// pro_car_window.sha
+///////////////////////////////////////////////////////////////////////////
+// Created on 8/16/2025 6:55:25 PM
+//
+// Authors: Zack
+//
+// Zack's HLSL-to-FlatOut-Shader v3.3.5
+///////////////////////////////////////////////////////////////////////////
+Texture Tex0;
+Texture Tex1;
+Texture Tex2;
+Texture Tex3;
+
+const string inputStreamFormat = "PosNormTex1";
+
+vertexshader vSdr =
+	decl
+	{
+		stream 0;
+		float	v0[3];	// pos
+		float	v1[3];	// nrm
+		float	v3[2];	// uv
+
+	}
+	asm
+	{
+		vs.3.0
+
+		dcl_position	v0
+		dcl_normal	v1
+		dcl_texcoord	v3
+
+		dcl_position	o0
+		dcl_texcoord0	o1	; FRESNEL
+		dcl_texcoord1	o2	; EXTRA
+		dcl_texcoord2	o3	; worldPos
+		dcl_texcoord3	o4	; screenPos
+		dcl_texcoord4	o5	; camPos
+		dcl_texcoord5	o6	; psIncident
+		dcl_texcoord6	o7	; normal
+		dcl_texcoord7	o8	; reflection
+		dcl_texcoord8	o9	; uv2D
+		dcl_texcoord9	o10	; camRight
+
+		; c32 = [R(0), 1-R(0), 0, 0]
+		; R0 = rotated normal
+		m3x3	r0.xyz, v1, c4
+
+		; position -> world
+		m4x3	r1.xyz, v0, c4
+
+		; normalization coords
+		mov	o7.xyz, r0
+
+		; compute vtx->eye ray
+		; normalize it
+		sub	r2.xyz, r1.xyz, c8.xyz
+		nrm r1.xyz, r2.xyz
+		mul	r3, r1.yzx, c32.zxy
+		mul	r2, r1.zxy, c32.yzx
+		sub	o10.xyz, r3, r2
+		mov	o6.xyz, r1.xyz
+
+		; passthru texture coords
+		mov	o9.xy, v3.xy
+
+		; 2*(V dot N)*N - V
+		mov	r0.w, c255.y
+		dp3	r2.x, r1.xyz, r0
+		add	r2.x, r2.x, r2.x
+		mul	r2.xyz, r2.x, r0
+		sub	o8.xyz, r1.xyz, r2.xyz
+
+		; Compute fresnel term approximation
+		; f = r(0) + (1.0-R(0)) * pow(1.0 - dot(eye, normal), 5.0 );
+		; Fresnel
+		dp3	r3.x, r1.xyz, r0
+		abs r2.x, r3.x
+		sub	r2.x, c255.y, r2.x
+		mul	r2.y, r2.x, r2.x
+		mul	r2.y, r2.y, r2.x
+		mad	r2.y, r2.y, c255.z, c255.z
+		mov	o1, r2.y
+
+		; project position
+		m4x4	r0, v0, c0
+		mov	o4, r0
+		mov	o0, r0
+
+	};
+
+pixelshader pSdr =
+	asm
+	{
+		ps.3.0
+
+		dcl_texcoord0	v0	; FRESNEL
+		dcl_texcoord1	v1	; EXTRA
+		dcl_texcoord2	v2	; worldPos
+		dcl_texcoord3	v3	; screenPos
+		dcl_texcoord4	v4	; camPos
+		dcl_texcoord5	v5	; psIncident
+		dcl_texcoord6	v6	; normal
+		dcl_texcoord7	v7	; reflection
+		dcl_texcoord8	v8	; uv2D
+		dcl_texcoord9	v9	; camRight
+
+		dcl_2d	s0	; colour
+		dcl_cube	s1	; specular
+		dcl_cube	s2	; diffuse
+		dcl_2d	s3	; prevFrame
+
+		; output.rgb = fresnel*env + specular
+		; output.a = (1-fresnel)*brightness
+		;return float4(1, 0, 0, 0);
+		mov	r0.xyz, v7
+		dp3	r1.x, r0.xyz, v5
+		sub	r1.x, r1.x, c3.x
+		min	r1.x, r1.x, c223.y
+		max	r1.x, r1.x, c223.w
+		mul	r1.x, r1.x, c3.y
+		rsq	r1.x, r1.x
+		rcp	r1.x, r1.x
+		mul	r0.y, r0.y, c223.z
+		dp3	r0.x, r0.xyz, v9
+		mul	r0.x, r0.x, c223.z
+		mov	r2, v3
+		mov	r2.y, -r2.y
+		mul	r2.x, r2.x, c3.z
+		mad	r2.y, r2.y, c3.z, c3.w
+		sub	r2.x, r2.x, c4.x
+		mov	r3, -r0.y
+		add	r2.y, r2.y, r3.x
+		mov	r3, -r0.x
+		add	r2.x, r2.x, r3.x
+		texld	r3, r2.xy, s3
+		mul	r0.rgb, r3, r1.x
+		sub	r0.a, c223.y, r1.x
+		mov	oC0, r0
+
+	};
+
+Technique T0
+{
+
+	Pass P0
+	{
+
+		VertexShaderConstantF[32] = float4(0.0f, 1.0f, 0.0f, 0.0f);
+		VertexShaderConstantF[255] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
+
+		PixelShaderConstantF[3] = float4(0.7f, 3.0f, 0.12f, 0.495f);
+		PixelShaderConstantF[4] = float4(0.501f, 0.0f, 0.0f, 0.0f);
+		PixelShaderConstantF[223] = float4(0.0174533f, 1.0f, 0.5f, 0.0f);
+
+		Texture[0] = <Tex0>;
+		Texture[1] = <Tex1>;
+		Texture[2] = <Tex2>;
+		Texture[3] = <Tex3>;
+
+		VertexShader = <vSdr>;
+		PixelShader = <pSdr>;
+	}
+}

@@ -1,6 +1,6 @@
 # FlatOut 2 Screen-Space Reflections
 
-This is a remake of Chloe's SSR mod for FlatOut 2, using Reloaded
+It's a remake of Chloe's SSR mod for FlatOut 2, using Reloaded
 
 https://github.com/user-attachments/assets/7e23c91b-7c10-4bbd-85c7-d3b5a2d5cd7d
 

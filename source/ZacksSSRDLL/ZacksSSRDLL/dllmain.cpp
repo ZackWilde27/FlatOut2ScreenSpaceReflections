@@ -89,7 +89,7 @@ extern "C"
             srcSurface->Release();
         }
 
-#ifdef GetBackBuffer
+#ifdef GetDepthBuffer
         if (SUCCEEDED(device->GetDepthStencilSurface(&srcSurface)))
         {
             CopySurfaceToTexture(srcSurface, depthBuffer);

@@ -37,7 +37,7 @@ void CreateTextureFromSurface(IDirect3DSurface9* surface, LPDIRECT3DTEXTURE9* ou
 
     D3DSURFACE_DESC desc;
     surface->GetDesc(&desc);
-    device->CreateTexture(windowRect.right, windowRect.bottom, 1, desc.Usage, desc.Format, desc.Pool, &backBuffer, NULL);
+    device->CreateTexture(windowRect.right, windowRect.bottom, 1, desc.Usage, desc.Format, desc.Pool, out_texture, NULL);
 }
 
 void CopySurfaceToTexture(IDirect3DSurface9* src, LPDIRECT3DTEXTURE9 dst)

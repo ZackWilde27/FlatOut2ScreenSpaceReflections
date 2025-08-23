@@ -1,4 +1,7 @@
-﻿using FlatOut2.SDK;
+﻿// So C# DOES have macros
+//#define ENABLE_SHADER_SWAPPER
+
+using FlatOut2.SDK;
 using FlatOut2.SDK.API;
 using FlatOut2.SDK.Enums;
 using FlatOut2_ZacksSSR.Configuration;
@@ -93,15 +96,21 @@ namespace FlatOut2_ZacksSSR
             {
                 if (filename.EndsWith(item))
                 {
+                    CreateTextures();
+
                     Shaders[ShaderCount] = new(shader_ESI, filename);
                     int i = 0;
-                    while (TextureExists(effect_EAX, "Tex" + i.ToString()))
+                    while (TextureExists(effect_EAX, $"Tex{i}"))
                         i++;
 
-                    // This decrement will need to be commented out if the shader swapping feature is re-enabled
+                    // Is it worse to have yet another $"Tex{i}" or the #if sandwich I got going on?
+#if !ENABLE_SHADER_SWAPPER
                     i--;
-                    Shaders[ShaderCount].Handle = "Tex" + i.ToString();
-                    _logger.WriteLine(filename + ", " + Shaders[ShaderCount++].Handle);
+#endif
+                    Shaders[ShaderCount].Handle = $"Tex{i}";
+#if !ENABLE_SHADER_SWAPPER
+                    UpdateTextures(Shaders[ShaderCount].Shader, Shaders[ShaderCount].Handle);
+#endif
                     break;
                 }
             }
@@ -112,11 +121,14 @@ namespace FlatOut2_ZacksSSR
 
         private static void PerFrame()
         {
-            //CheckShaderRecomp();
-
             GetBackBuffer();
+
+#if ENABLE_SHADER_SWAPPER
+            CheckShaderRecomp();
+
             for (int i = 0; i < ShaderCount; i++)
                 UpdateTextures(Shaders[i].Shader, Shaders[i].Handle);
+#endif
         }
 
         // I implemented the shader swapper into this mod for developing the shaders

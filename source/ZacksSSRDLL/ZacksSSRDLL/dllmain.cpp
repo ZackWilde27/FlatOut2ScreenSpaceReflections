@@ -80,8 +80,6 @@ extern "C"
 
     __declspec(dllexport) extern void __stdcall GetBackBuffer()
     {
-        CreateTextures();
-
         IDirect3DSurface9* srcSurface;
         if (SUCCEEDED(device->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_LEFT, &srcSurface)))
         {

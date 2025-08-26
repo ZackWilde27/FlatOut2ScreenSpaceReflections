@@ -2,6 +2,8 @@
 
 It's a remake of Chloe's SSR mod for FlatOut 2, using Reloaded
 
+The xNya version can be found [here](https://github.com/ZackWilde27/FlatOut2_SSR_xNya)
+
 https://github.com/user-attachments/assets/7e23c91b-7c10-4bbd-85c7-d3b5a2d5cd7d
 
 Right now it only replaces the car body shader, I'll add the window shaders once those are done
